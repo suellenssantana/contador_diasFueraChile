@@ -4,10 +4,110 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Calculadora de Dias Fora do Chile</title>
-  <link rel="stylesheet" href="/styles.css">
 
 </head>
 <body>
+
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+    padding: 20px;
+    padding-bottom: 80px;
+    margin: 0;
+  }
+
+  h1 {
+    text-align: center;
+    color: #333;
+  }
+
+  .entry {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  input[type="datetime-local"] {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  button {
+    padding: 8px 12px;
+    background: #0077cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: #005fa3;
+  }
+
+  .remove-button {
+    background: #cc0000;
+    margin-left: 10px;
+  }
+
+  .remove-button:hover {
+    background: #990000;
+  }
+
+  #results {
+    margin-top: 20px;
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #444;
+  }
+
+  .entry-wrapper {
+    margin-bottom: 20px;
+    border-left: 4px solid #0077cc;
+    padding-left: 10px;
+  }
+
+  footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #0077cc;
+    color: white;
+    text-align: center;
+    padding: 12px 0;
+    font-size: 0.9em;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+  }
+
+  .lang-selector {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+  }
+
+  .lang-selector img {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    transition: transform 0.2s, border 0.2s;
+  }
+
+  .lang-selector img:hover {
+    transform: scale(1.1);
+    border: 2px solid #0077cc;
+  }
+    </style>
+
   <!-- Seletor de idiomas -->
   <div class="lang-selector">
     <img src="https://flagcdn.com/w40/br.png" alt="Português" onclick="setLanguage('pt')">
@@ -24,9 +124,148 @@
   <div id="results"></div>
 
   <footer>
-    <span id="footer-text">Desenvolvido por [Seu Nome] – &copy; 2025</span>
+    <span id="footer-text">Desenvolvido por Suellen Santana – &copy; 2025</span>
   </footer>
 
-  <script src="/script.js"></script>
+  <script>
+    // Autora: Suellen Santana
+// Data: 2025-03-22
+// Descrição: Script para calcular a quantidade de dias que uma pessoa ficou fora do Chile
+
+let entryCount = 0;
+let currentLang = 'pt';
+
+const translations = {
+  pt: {
+    title: "Calculadora de Dias Fora do Chile",
+    add: "Adicionar Entrada/Saída",
+    calc: "Calcular Dias Fora",
+    saida: "Saída do Chile",
+    entrada: "Entrada no Chile",
+    remover: "Remover",
+    resultado: dias => `Você ficou fora do Chile por um total de ${dias} dia(s).`,
+    footer: "Desenvolvido por [Seu Nome] – © 2025",
+    alertaPreencher: i => `Preencha todos os horários da entrada ${i}`,
+    alertaOrdem: i => `A entrada ${i} deve ser posterior à saída`
+  },
+  en: {
+    title: "Days Outside Chile Calculator",
+    add: "Add Entry/Exit",
+    calc: "Calculate Days Outside",
+    saida: "Exit from Chile",
+    entrada: "Entry to Chile",
+    remover: "Remove",
+    resultado: dias => `You were outside Chile for a total of ${dias} day(s).`,
+    footer: "Developed by [Your Name] – © 2025",
+    alertaPreencher: i => `Please fill in all times for entry ${i}`,
+    alertaOrdem: i => `Entry ${i} must be after exit`
+  },
+  es: {
+    title: "Calculadora de Días Fuera de Chile",
+    add: "Agregar Salida/Entrada",
+    calc: "Calcular Días Fuera",
+    saida: "Salida de Chile",
+    entrada: "Ingreso a Chile",
+    remover: "Eliminar",
+    resultado: dias => `Estuviste fuera de Chile por un total de ${dias} día(s).`,
+    footer: "Desarrollado por [Su Nombre] – © 2025",
+    alertaPreencher: i => `Complete todas las horas para la entrada ${i}`,
+    alertaOrdem: i => `La entrada ${i} debe ser posterior a la salida`
+  }
+};
+
+function setLanguage(lang) {
+  currentLang = lang;
+  const t = translations[lang];
+
+  // Atualizar textos da interface
+  document.getElementById('title').innerText = t.title;
+  document.getElementById('add-button').innerText = t.add;
+  document.getElementById('calc-button').innerText = t.calc;
+  document.getElementById('footer-text').innerText = t.footer;
+
+  // Limpar entradas antigas
+  document.getElementById("entries-container").innerHTML = "";
+  entryCount = 0;
+
+  // Adicionar nova entrada já traduzida
+  addEntry();
+}
+
+function addEntry() {
+  const container = document.getElementById("entries-container");
+  const t = translations[currentLang];
+
+  const entryWrapper = document.createElement("div");
+  entryWrapper.classList.add("entry-wrapper");
+  entryWrapper.setAttribute("id", `entry-${entryCount}`);
+
+  entryWrapper.innerHTML = `
+    <div class="entry">
+      <label id="label-saida-${entryCount}">${t.saida}: <input type="datetime-local" id="saida-${entryCount}"></label>
+      <label id="label-entrada-${entryCount}">${t.entrada}: <input type="datetime-local" id="entrada-${entryCount}"></label>
+      <button class="remove-button" id="remove-${entryCount}" onclick="removerEntrada(${entryCount})">${t.remover}</button>
+    </div>
+  `;
+
+  container.appendChild(entryWrapper);
+  entryCount++;
+}
+
+function removerEntrada(index) {
+  const entry = document.getElementById(`entry-${index}`);
+  if (entry) {
+    entry.remove();
+  }
+}
+
+function calcularDias() {
+  let totalHoras = 0;
+  let valid = true;
+  const t = translations[currentLang];
+
+  for (let i = 0; i < entryCount; i++) {
+    const saidaEl = document.getElementById(`saida-${i}`);
+    const entradaEl = document.getElementById(`entrada-${i}`);
+
+    if (!saidaEl || !entradaEl) continue;
+
+    const saida = saidaEl.value;
+    const entrada = entradaEl.value;
+
+    if (!saida || !entrada) {
+      alert(t.alertaPreencher(i + 1));
+      valid = false;
+      break;
+    }
+
+    const saidaDate = new Date(saida);
+    const entradaDate = new Date(entrada);
+
+    if (entradaDate <= saidaDate) {
+      alert(t.alertaOrdem(i + 1));
+      valid = false;
+      break;
+    }
+
+    const diffMs = entradaDate - saidaDate;
+    const diffHoras = diffMs / (1000 * 60 * 60);
+    totalHoras += diffHoras;
+  }
+
+  if (valid) {
+    const diasFora = Math.ceil(totalHoras / 24);
+    document.getElementById("results").innerText = t.resultado(diasFora);
+  } else {
+    document.getElementById("results").innerText = "";
+  }
+}
+
+// Inicialização padrão
+window.onload = () => {
+  setLanguage(currentLang);
+};
+
+  </script>
 </body>
 </html>
